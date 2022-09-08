@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Static Template</title>
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.1/jquery.js"></script>
+  </head>
+  <body>
+    <span style="color: mediumorchid;"
+      >注意所有跳转到egate的链接打开后，需要你手动点一下地址栏在按一下回车（手机点击跳转）再会正常显示页面。这是egate系统本身的限制。(如果还不行就手动复制地址打开)</span
+    ><br />
+    <hr />
+    首先你需要去<a
+      href="https://egate.shanghaitech.edu.cn/publicapp/sys/mykbxt/api/getMyTimeTableList.do?weekOfTerm=1&schoolYearTerm=2022-2023-1"
+      style="color: orange;"
+      target="_blank"
+      >这里</a
+    >⬅，然后把网页里的所有内容直接完整复制到下面的输入框里<br />
+    <input
+      type="text"
+      value=""
+      placeholder="复制那个一长串到这里"
+      id="mycrouseTable"
+    />
+    <input type="button" value="点击我获取所有课程" onclick="genURLs()" />
+    <div id="linksArea">
+      如果成功的话，你应该会看到下面出现了很多跳转链接。<br />
+    </div>
+    <script>
+      function genURLs() {
+        console.log("开始生成查询链接");
+        var cotent = $("#mycrouseTable")[0].value;
+        var jCon = JSON.parse(cotent);
+
+        var courses = [];
+        var coursesFlags = [];
+
+        for (let weekday = 1; weekday < 6; weekday++) {
+          for (let courseCount = 1; courseCount < 12; courseCount++) {
+            var courseInfor =
+              jCon["timeTable"][weekday.toString()][courseCount.toString()];
+            if (courseInfor && !coursesFlags.includes(courseInfor["name"])) {
+              console.log(courseInfor["name"]);
+              coursesFlags.push(courseInfor["name"]);
+              courses.push({
+                name: courseInfor["name"],
+                startT: courseInfor["section"].split("-")[0],
+                endT: courseInfor["section"].split("-")[1],
+                weekday: courseInfor["weekday"],
+                classid: courseInfor["classId"],
+                room: courseInfor["classroom"]
+              });
+            }
+          }
+        }
+        console.log("处理原始数据");
+        console.log(courses[0]["name"]);
+
+        for (var i = 0; i < courses.length; i++) {
+          var courseName = courses[i]["name"];
+          var startT = courses[i]["startT"];
+          var endT = courses[i]["endT"];
+          var weekday = courses[i]["weekday"];
+          var classid = courses[i]["classid"];
+          var room = courses[i]["room"];
+
+          var courseURL = `https://egate.shanghaitech.edu.cn/publicapp/sys/mykbxt/api/queryCourseMembers.do?classId=${classid}&skzc=1&skxq=${weekday}&ksjc=${startT}&jsjc=${endT}&jasmc=${room}`;
+          var htmltag = `<a href="${courseURL}" target="_blank">${courseName}</a><br>`;
+
+          $("#linksArea")[0].innerHTML += htmltag;
+          // document.writeln(htmltag);
+        }
+      }
+    </script>
+  </body>
+</html>
